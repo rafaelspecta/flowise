@@ -1,0 +1,62 @@
+version: "3.9"
+services:
+  db:
+    image: postgres
+    container_name: FlowiseAI-DB
+    hostname: flowise-db
+    mem_limit: 1g
+    cpu_shares: 768
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "flowise", "-U", "flowiseuser"]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/postgresql/data:rw
+    environment:
+      POSTGRES_DB: flowise
+      POSTGRES_USER: flowiseuser
+      POSTGRES_PASSWORD: flowisepass
+    restart: on-failure:5
+
+  flowise:
+    image: flowiseai/flowise:latest
+    command: /bin/sh -c "sleep 3; flowise start"
+    container_name: FlowiseAI
+    hostname: flowise
+    mem_limit: 4g
+    cpu_shares: 768
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000
+    ports:
+      - 8459:3000
+    volumes:
+      - flowise_data:/root/.flowise:rw
+    environment:
+      DEBUG: false
+      PORT: 3000
+      FLOWISE_USERNAME: admin
+      FLOWISE_PASSWORD: 123
+      DATABASE_PATH: /root/.flowise
+      APIKEY_PATH: /root/.flowise
+      SECRETKEY_PATH: /root/.flowise
+      LOG_LEVEL: info
+      LOG_PATH: /root/.flowise/logs
+      DATABASE_TYPE: postgres
+      DATABASE_PORT: 5432
+      DATABASE_HOST: flowise-db
+      DATABASE_NAME: flowise
+      DATABASE_USER: flowiseuser
+      DATABASE_PASSWORD: flowisepass
+    restart: on-failure:5
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+    db_data:
+    flowise_data:
