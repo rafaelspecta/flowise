@@ -1,7 +1,6 @@
-version: "3.9"
 services:
   db:
-    image: postgres
+    image: postgres:16
     container_name: FlowiseAI-DB
     hostname: flowise-db
     mem_limit: 1g
@@ -23,7 +22,7 @@ services:
 
   flowise:
     image: flowiseai/flowise:latest
-    command: /bin/sh -c "sleep 3; flowise start"
+    entrypoint: /bin/sh -c "sleep 3; flowise start"
     container_name: FlowiseAI
     hostname: flowise
     mem_limit: 4g
