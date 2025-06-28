@@ -22,7 +22,8 @@ services:
 
   flowise:
     image: flowiseai/flowise:latest
-    entrypoint: /bin/sh -c "sleep 3; flowise start"
+    entrypoint: /bin/sh
+    command: -c "sleep 3; flowise start"
     container_name: FlowiseAI
     hostname: flowise
     mem_limit: 4g
